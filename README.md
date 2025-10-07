@@ -1,7 +1,7 @@
 # Municipality Water Bill Payments
 
 A full-stack web application designed to simplify and secure the **management of municipal water bill payments**.  
-The system implements strict **role-based access control (RBAC)** to ensure that each user only interacts with data relevant to their municipality.
+The system implements strict **role-based access control (RBAC)** to ensure that each user only interacts with data relevant to their municipality, integrates Cashfree Payments API for online transactions with webhook-based auto reconciliation, and includes a Mock Bank API for bill verification. Built using Node.js, Express, MySQL, and React, it features real-time status tracking, email payment links, and a clean operator dashboard.
 
 ## System Overview
 
