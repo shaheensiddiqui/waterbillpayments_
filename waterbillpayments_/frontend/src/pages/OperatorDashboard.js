@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import Sidebar from "../components/operator/Sidebar";
 import FetchBill from "../components/operator/FetchBill";
 import CreateBill from "../components/operator/CreateBill";
+import ViewBills from "../components/operator/ViewBills";
+
 
 export default function OperatorDashboard() {
   const token = localStorage.getItem("token");
@@ -14,7 +16,7 @@ export default function OperatorDashboard() {
       case "create":
         return <CreateBill token={token} />;
       case "view":
-        return <p className="text-muted">Coming soon: View all bills</p>;
+       return <ViewBills token={token} />;
       default:
         return <FetchBill token={token} />;
     }

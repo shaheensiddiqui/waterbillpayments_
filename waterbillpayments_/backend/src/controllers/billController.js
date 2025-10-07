@@ -5,7 +5,6 @@ const { validateBillInput } = require("../utils/validateBillInput");
 
 exports.fetchBillFromMockBank = async (req, res) => {
   try {
-    // Accept either camelCase or snake_case payloads
     const { billNumber, bill_number } = req.body || {};
     const billNum = (billNumber || bill_number || "").trim();
 
@@ -13,66 +12,70 @@ exports.fetchBillFromMockBank = async (req, res) => {
       return res.status(400).json({ error: "Bill number is required" });
     }
 
-    const user = req.user; // operator/admin info from JWT
+    const user = req.user;
+
+    // 1. Check if bill already exists locally
+    let bill = await Bill.findOne({ where: { bill_number: billNum } });
+    if (bill) {
+      console.log("Found bill in local database");
+      return res.json({ message: "Bill fetched from database", bill });
+    }
+
+    // 2. If not found, fetch from mock-bank
     const base = process.env.MOCK_BANK_URL || "http://localhost:5001";
     const url = `${base}/mock-bank/bills/${encodeURIComponent(billNum)}`;
 
-    // Call mock-bank
     const mockRes = await axios.get(url);
     const data = mockRes.data;
-    console.log("🔥 MockBank returned status:", data.status);
 
-    // Upsert into our DB (only create if not present)
-    let bill = await Bill.findOne({ where: { bill_number: data.bill_number } });
-    if (!bill) {
-  bill = await Bill.create({
-    bill_number: data.bill_number,
-    consumer_name: data.consumer_name,
-    email: data.email,
-    address: data.address,
-    service_period_start: data.service_period_start,
-    service_period_end: data.service_period_end,
-    due_date: data.due_date,
-    base_amount: data.base_amount,
-    penalty_amount: data.penalty_amount,
-    total_amount: data.total_amount,
-    status: (() => {
-      const s = (data.status || "").trim().toUpperCase();
-      const allowed = [
-        "CREATED",
-        "PAID",
-        "EXPIRED",
-        "CANCELLED",
-        "LINK_SENT",
-        "PAYMENT_PENDING",
-        "UNPAID"
-      ];
-      return allowed.includes(s) ? s : "CREATED";
-    })(),
-    bank_ref: data.bank_ref,
-    created_by: user?.id || null,
-    municipality_id: user?.municipality_id || null,
-  });
-}
+    console.log("MockBank returned status:", data.status);
 
+    // 3. Save to DB (upsert new record)
+    bill = await Bill.create({
+      bill_number: data.bill_number,
+      consumer_name: data.consumer_name,
+      email: data.email,
+      address: data.address,
+      service_period_start: data.service_period_start,
+      service_period_end: data.service_period_end,
+      due_date: data.due_date,
+      base_amount: data.base_amount,
+      penalty_amount: data.penalty_amount,
+      total_amount: data.total_amount,
+      status: (() => {
+        const s = (data.status || "").trim().toUpperCase();
+        const allowed = [
+          "CREATED",
+          "PAID",
+          "EXPIRED",
+          "CANCELLED",
+          "LINK_SENT",
+          "PAYMENT_PENDING",
+          "UNPAID",
+        ];
+        return allowed.includes(s) ? s : "CREATED";
+      })(),
+      bank_ref: data.bank_ref || null,
+      created_by: user?.id || null,
+      municipality_id: user?.municipality_id || null,
+    });
 
+    console.log("Bill saved to local database");
     return res.json({ message: "Bill fetched successfully", bill });
   } catch (err) {
-    // Handle known mock-bank errors cleanly
     if (err.response) {
       if (err.response.status === 404) {
         return res.status(404).json({ error: "Bill not found in mock bank" });
       }
       if (err.response.status === 409) {
-        // mock-bank signals already paid → reflect as 409, not 500
         return res.status(409).json({ error: "Bill already paid" });
       }
     }
-    // Fallback
     console.error("fetchBillFromMockBank error:", err.message);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 
 exports.createBill = async (req, res) => {
   try {
@@ -103,3 +106,26 @@ exports.createBill = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
+
+exports.getAllBills = async (req, res) => {
+  try {
+    const user = req.user;
+
+    const whereClause =
+      user.role === "OPERATOR"
+        ? { created_by: user.id }
+        : user.role === "ADMIN"
+        ? { municipality_id: user.municipality_id }
+        : {};
+
+    const bills = await Bill.findAll({
+      where: whereClause,
+      order: [["createdAt", "DESC"]],
+    });
+
+    res.json(bills);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
