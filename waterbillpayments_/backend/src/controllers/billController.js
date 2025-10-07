@@ -129,3 +129,15 @@ exports.getAllBills = async (req, res) => {
   }
 };
 
+exports.getBillByNumber = async (req, res) => {
+  try {
+    const { billNumber } = req.params;
+    const bill = await Bill.findOne({ where: { bill_number: billNumber } });
+    if (!bill) return res.status(404).json({ error: "Bill not found" });
+    res.json(bill);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+

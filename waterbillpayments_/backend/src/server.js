@@ -7,30 +7,22 @@ const { syncModels, User } = require("./models");
 
 const authRoutes = require("./routes/authRoutes");
 const municipalityRoutes = require("./routes/municipalityRoutes");
-
-
+const webhookRoutes = require("./routes/webhookRoutes");
+const userRoutes = require("./routes/userRoutes");
+const billRoutes = require("./routes/billRoutes");
+const paylinkRoutes = require("./routes/paylinkRoutes");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// routes
 app.use("/api/auth", authRoutes);
 app.use("/api/municipalities", municipalityRoutes);
-
-const userRoutes = require("./routes/userRoutes");
 app.use("/api/users", userRoutes);
-
-const billRoutes = require("./routes/billRoutes");
 app.use("/api/bills", billRoutes);
-
-const paylinkRoutes = require("./routes/paylinkRoutes");
 app.use("/api/paylinks", paylinkRoutes);
+app.use("/webhooks", webhookRoutes);
 
-
-
-
-// Seeder function for SuperAdmin
 async function seedSuperAdmin() {
   const email = "superadmin@municipal.gov";
   const password = "Super@123";
@@ -45,7 +37,6 @@ async function seedSuperAdmin() {
       password_hash: hash,
       role: "SUPERADMIN",
     });
-
     console.log("Default SuperAdmin created:");
     console.log(`Email: ${email}`);
     console.log(`Password: ${password}`);
@@ -54,7 +45,6 @@ async function seedSuperAdmin() {
   }
 }
 
-// start server
 const PORT = process.env.PORT || 4000;
 
 (async () => {

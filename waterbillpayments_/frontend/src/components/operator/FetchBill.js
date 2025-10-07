@@ -79,7 +79,11 @@ export default function FetchBill({ token }) {
       );
       setBill(res.data.bill);
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to fetch bill");
+const msg =
+  typeof err.response?.data?.error === "object"
+    ? err.response?.data?.error?.message || JSON.stringify(err.response.data.error)
+    : err.response?.data?.error || err.message || "Failed to fetch bill";
+setError(msg);
     } finally {
       setLoading(false);
     }
@@ -97,26 +101,13 @@ export default function FetchBill({ token }) {
       setLink(res.data.link);
       setBill(res.data.bill);
     } catch (err) {
-      setLinkErr(err.response?.data?.error || "Failed to create link");
+const msg =
+  typeof err.response?.data?.error === "object"
+    ? err.response?.data?.error?.message || JSON.stringify(err.response.data.error)
+    : err.response?.data?.error || err.message || "Failed to create link";
+setLinkErr(msg);
     }
   }
-
-  // 🔹 Auto-refresh every 5 seconds if a bill exists
-  useEffect(() => {
-    if (!bill) return;
-    const interval = setInterval(async () => {
-      try {
-        const res = await axios.get(
-          `${API_BASE}/api/bills/${bill.bill_number}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setBill(res.data.bill);
-      } catch (err) {
-        console.log("Auto-refresh failed:", err.message);
-      }
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [bill, token]);
 
   return (
     <div>
@@ -170,6 +161,26 @@ export default function FetchBill({ token }) {
                 <QRCodeCanvas value={link.link_url} size={160} />
               </div>
             )}
+
+            <button
+  className="btn btn-outline-primary mt-2 ms-2"
+  onClick={async () => {
+    try {
+      await axios.post(
+  `${API_BASE}/api/bills/email/paylink`,
+  { bill_number: bill.bill_number, to_email: bill.email },
+  { headers: { Authorization: `Bearer ${token}` } }
+);
+
+      alert("Email sent successfully!");
+    } catch (err) {
+      alert(err.response?.data?.error || "Failed to send email");
+    }
+  }}
+>
+  Send Email
+</button>
+
 
             {/* 🔹 Timeline added here */}
             <BillTimeline currentStatus={bill.status} />

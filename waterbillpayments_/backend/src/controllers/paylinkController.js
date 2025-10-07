@@ -30,32 +30,25 @@ exports.createPayLink = async (req, res) => {
     const amount = Number(bill.total_amount || 0);
     if (!amount || amount <= 0) return res.status(400).json({ error: "Invalid amount" });
 
-    const haveCashfree = !!(process.env.CASHFREE_CLIENT_ID && process.env.CASHFREE_CLIENT_SECRET && process.env.CASHFREE_BASE_URL && process.env.CASHFREE_API_VERSION);
+    // Always use Cashfree sandbox (disable mock fallback)
+    const cfBase = process.env.CASHFREE_BASE_URL || "https://sandbox.cashfree.com/pg";
 
-    if (!haveCashfree) {
-      const mockUrl = `https://pay.mock/${encodeURIComponent(linkId)}`;
-      const link = await PaymentLink.create({
-        bill_id: bill.id,
-        cf_link_id: null,
-        link_id: linkId,
-        link_url: mockUrl,
-        amount,
-        currency: "INR",
-        expires_at: null,
-        status: "ACTIVE",
-      });
-      await bill.update({ status: "LINK_SENT" });
-      return res.status(201).json({ message: "Link created", link, bill });
-    }
 
     const body = {
-      customer_details: { customer_email: bill.email, customer_name: bill.consumer_name },
-      link_amount: amount,
-      link_currency: "INR",
-      link_purpose: `Water bill ${bill.bill_number}`,
-      link_notify: { send_email: false, send_sms: false },
-      link_meta: { return_url: `${process.env.APP_BASE_URL || "http://localhost:3000"}/thank-you?bill=${bill.bill_number}` }
-    };
+  customer_details: {
+    customer_email: bill.email,
+    customer_name: bill.consumer_name,
+    customer_phone: "9999999999" // Hardcoded phone to satisfy Cashfree requirement
+  },
+  link_amount: amount,
+  link_currency: "INR",
+  link_purpose: `Water bill ${bill.bill_number}`,
+  link_notify: { send_email: false, send_sms: false },
+  link_meta: {
+    return_url: `${process.env.APP_BASE_URL || "http://localhost:3000"}/thank-you?bill=${bill.bill_number}`
+  }
+};
+
 
     const cfRes = await axios.post(
       `${process.env.CASHFREE_BASE_URL}/links`,
