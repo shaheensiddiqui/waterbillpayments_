@@ -1,0 +1,19 @@
+/* === Global Styles === */
+
+/* full-screen gradient background */
+body {
+  background-color: lightskyblue;
+  min-height: 100vh;
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+}
+
+/* optional: smooth font rendering */
+* {
+  box-sizing: border-box;
+}
+
+/* helper class for background reuse */
+.bg-light-blue {
+  background-color: lightskyblue;
+}
