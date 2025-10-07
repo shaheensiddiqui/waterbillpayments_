@@ -5,24 +5,52 @@ const bcrypt = require("bcryptjs");
 const { connectDB } = require("./config/db");
 const { syncModels, User } = require("./models");
 
+// Routes
 const authRoutes = require("./routes/authRoutes");
 const municipalityRoutes = require("./routes/municipalityRoutes");
-const webhookRoutes = require("./routes/webhookRoutes");
 const userRoutes = require("./routes/userRoutes");
 const billRoutes = require("./routes/billRoutes");
 const paylinkRoutes = require("./routes/paylinkRoutes");
+const { cashfreeWebhook } = require("./controllers/webhookController");
 
 const app = express();
+
+// --------------------------------------------------
+// ✅ 1. Webhook route with raw body (must come FIRST)
+// --------------------------------------------------
+app.post(
+  "/webhooks/cashfree",
+  express.raw({ type: "*/*" }),
+  (req, res, next) => {
+    req.rawBody = req.body.toString();
+    try {
+      req.body = JSON.parse(req.rawBody);
+    } catch {
+      req.body = {};
+    }
+    next();
+  },
+  cashfreeWebhook
+);
+
+// --------------------------------------------------
+// ✅ 2. Normal middleware for everything else
+// --------------------------------------------------
 app.use(cors());
 app.use(express.json());
 
+// --------------------------------------------------
+// ✅ 3. API Routes
+// --------------------------------------------------
 app.use("/api/auth", authRoutes);
 app.use("/api/municipalities", municipalityRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/bills", billRoutes);
 app.use("/api/paylinks", paylinkRoutes);
-app.use("/webhooks", webhookRoutes);
 
+// --------------------------------------------------
+// ✅ 4. Seed SuperAdmin
+// --------------------------------------------------
 async function seedSuperAdmin() {
   const email = "superadmin@municipal.gov";
   const password = "Super@123";
@@ -31,25 +59,25 @@ async function seedSuperAdmin() {
   const existing = await User.findOne({ where: { email } });
   if (!existing) {
     const hash = await bcrypt.hash(password, 10);
-    await User.create({
-      name,
-      email,
-      password_hash: hash,
-      role: "SUPERADMIN",
-    });
-    console.log("Default SuperAdmin created:");
-    console.log(`Email: ${email}`);
-    console.log(`Password: ${password}`);
+    await User.create({ name, email, password_hash: hash, role: "SUPERADMIN" });
+    console.log(`✅ Default SuperAdmin created — ${email} / ${password}`);
   } else {
-    console.log("SuperAdmin already exists:", email);
+    console.log(`SuperAdmin already exists: ${email}`);
   }
 }
 
+// --------------------------------------------------
+// ✅ 5. Start Server
+// --------------------------------------------------
 const PORT = process.env.PORT || 4000;
 
 (async () => {
-  await connectDB();
-  await syncModels();
-  await seedSuperAdmin();
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  try {
+    await connectDB();
+    await syncModels();
+    await seedSuperAdmin();
+    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+  } catch (err) {
+    console.error("❌ Server start failed:", err.message);
+  }
 })();

@@ -34,20 +34,28 @@ exports.createPayLink = async (req, res) => {
     const cfBase = process.env.CASHFREE_BASE_URL || "https://sandbox.cashfree.com/pg";
 
 
-    const body = {
+const body = {
   customer_details: {
     customer_email: bill.email,
     customer_name: bill.consumer_name,
-    customer_phone: "9999999999" // Hardcoded phone to satisfy Cashfree requirement
+    customer_phone: "+919999999999"
   },
   link_amount: amount,
   link_currency: "INR",
   link_purpose: `Water bill ${bill.bill_number}`,
   link_notify: { send_email: false, send_sms: false },
   link_meta: {
-    return_url: `${process.env.APP_BASE_URL || "http://localhost:3000"}/thank-you?bill=${bill.bill_number}`
+    return_url: `${process.env.APP_BASE_URL}/thank-you?bill=${bill.bill_number}`
+  },
+  link_notes: {
+    bill_number: bill.bill_number  // ✅ store bill number inside link notes
+  },
+  order_tags: {
+    bill_number: bill.bill_number,   // add this line
+    link_id: linkId
   }
 };
+
 
 
     const cfRes = await axios.post(
