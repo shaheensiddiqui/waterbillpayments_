@@ -1,17 +1,75 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { API_BASE } from "../../config";
+import { QRCodeCanvas } from "qrcode.react";
+
+const statuses = ["CREATED", "LINK_SENT", "PAID", "CANCELLED"];
+
+function BillTimeline({ currentStatus }) {
+  const statuses = ["CREATED", "LINK_SENT", "PAID", "CANCELLED"];
+  const activeIndex = statuses.indexOf(currentStatus);
+
+  return (
+    <div className="mt-4">
+      <h6 className="fw-bold mb-3">Bill Status Timeline</h6>
+      <div className="d-flex justify-content-between align-items-center position-relative" style={{ maxWidth: "600px" }}>
+        {statuses.map((status, index) => {
+          const isActive = index <= activeIndex;
+          return (
+            <div key={status} className="text-center flex-fill position-relative">
+              <div
+                className={`rounded-circle mx-auto ${
+                  isActive ? "bg-success" : "bg-light"
+                }`}
+                style={{
+                  width: "18px",
+                  height: "18px",
+                  border: "2px solid #6c757d",
+                  zIndex: 2,
+                }}
+              ></div>
+              <div
+                className={`mt-2 small ${
+                  isActive ? "text-success fw-semibold" : "text-muted"
+                }`}
+              >
+                {status.replace("_", " ")}
+              </div>
+              {index < statuses.length - 1 && (
+                <div
+                  className={`position-absolute top-50 start-100 translate-middle-y ${
+                    isActive ? "bg-success" : "bg-secondary"
+                  }`}
+                  style={{
+                    height: "3px",
+                    width: "100%",
+                    zIndex: 1,
+                  }}
+                ></div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 
 export default function FetchBill({ token }) {
   const [billNumber, setBillNumber] = useState("");
   const [bill, setBill] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [link, setLink] = useState(null);
+  const [linkErr, setLinkErr] = useState("");
 
-  async function handleFetchBill(e) {
+  async function handleFetch(e) {
     e.preventDefault();
     setError("");
     setBill(null);
+    setLink(null);
+    setLinkErr("");
     setLoading(true);
     try {
       const res = await axios.post(
@@ -27,15 +85,48 @@ export default function FetchBill({ token }) {
     }
   }
 
+  async function handleCreateLink() {
+    setLinkErr("");
+    setLink(null);
+    try {
+      const res = await axios.post(
+        `${API_BASE}/api/paylinks`,
+        { bill_number: bill.bill_number, channel: "link" },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setLink(res.data.link);
+      setBill(res.data.bill);
+    } catch (err) {
+      setLinkErr(err.response?.data?.error || "Failed to create link");
+    }
+  }
+
+  // 🔹 Auto-refresh every 5 seconds if a bill exists
+  useEffect(() => {
+    if (!bill) return;
+    const interval = setInterval(async () => {
+      try {
+        const res = await axios.get(
+          `${API_BASE}/api/bills/${bill.bill_number}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setBill(res.data.bill);
+      } catch (err) {
+        console.log("Auto-refresh failed:", err.message);
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [bill, token]);
+
   return (
-    <>
-      <form onSubmit={handleFetchBill} className="mb-5">
-        <h5 className="fw-bold text-primary mb-3">Fetch Bill</h5>
+    <div>
+      <form onSubmit={handleFetch} className="mb-4">
+        <label className="form-label fw-semibold">Enter Bill Number</label>
         <div className="input-group">
           <input
             type="text"
             className="form-control form-control-lg fs-6"
-            placeholder="Enter bill number (e.g. WB-2025-0003)"
+            placeholder="e.g., WB-2025-0001"
             value={billNumber}
             onChange={(e) => setBillNumber(e.target.value)}
           />
@@ -47,11 +138,12 @@ export default function FetchBill({ token }) {
             {loading ? "Fetching..." : "Fetch"}
           </button>
         </div>
-        {error && <p className="text-danger small mt-2">{error}</p>}
       </form>
 
+      {error && <p className="text-danger small">{error}</p>}
+
       {bill && (
-        <div className="card mt-4 shadow-sm border-0">
+        <div className="card shadow-sm border-0">
           <div className="card-body">
             <h5 className="text-primary fw-bold mb-3">Bill Details</h5>
             <p><strong>Consumer Name:</strong> {bill.consumer_name}</p>
@@ -61,9 +153,29 @@ export default function FetchBill({ token }) {
             <p><strong>Due Date:</strong> {bill.due_date}</p>
             <p><strong>Total Amount:</strong> ₹{bill.total_amount}</p>
             <p><strong>Status:</strong> {bill.status}</p>
+
+            <button className="btn btn-success mt-2" onClick={handleCreateLink}>
+              Create Payment Link
+            </button>
+
+            {linkErr && <p className="text-danger small mt-2">{linkErr}</p>}
+
+            {link && (
+              <div className="mt-3">
+                <div className="mb-2">
+                  <a href={link.link_url} target="_blank" rel="noreferrer">
+                    {link.link_url}
+                  </a>
+                </div>
+                <QRCodeCanvas value={link.link_url} size={160} />
+              </div>
+            )}
+
+            {/* 🔹 Timeline added here */}
+            <BillTimeline currentStatus={bill.status} />
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

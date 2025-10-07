@@ -24,6 +24,10 @@ app.use("/api/users", userRoutes);
 const billRoutes = require("./routes/billRoutes");
 app.use("/api/bills", billRoutes);
 
+const paylinkRoutes = require("./routes/paylinkRoutes");
+app.use("/api/paylinks", paylinkRoutes);
+
+
 
 
 // Seeder function for SuperAdmin

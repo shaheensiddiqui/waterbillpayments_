@@ -2,6 +2,8 @@ const { sequelize } = require("../config/db");
 const User = require("./User");
 const Municipality = require("./Municipality");
 const Bill = require("./Bill"); // ✅ Add this
+const PaymentLink = require("./PaymentLink");
+
 
 // Associations
 Municipality.hasMany(User, { foreignKey: "municipality_id" });
@@ -26,5 +28,6 @@ module.exports = {
   User,
   Municipality,
   Bill,       // ✅ Export Bill
+  PaymentLink,
   syncModels,
 };
