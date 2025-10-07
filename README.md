@@ -63,6 +63,49 @@ SMTP_PORT=
 SMTP_USER=
 SMTP_PASS=
 ```
+## Local Setup
+
+Follow these steps to run all components of the Municipal Water Bill Payments system locally:
+
+1. Backend Setup
+cd backend
+npm init -y
+node src/server.js
+
+2. Frontend Setup
+cd frontend
+npx create-react-app frontend
+npm start
+
+3. Mock Bank API
+cd mock-bank
+npm init -y
+node server.js
+
+4. MySQL Database
+CREATE DATABASE waterbillpayments;
+
+5. Ngrok (for Webhook Testing)
+ngrok http 4000
+
+6. MailHog (for Local Email Testing)
+mailhog
+
+
+Access it at: http://localhost:8025/
+
+## Mock Bank Integration
+
+The application includes a Mock Bank API that simulates an external billing system.
+When the operator enters a bill number, the backend first queries the Mock Bank service:
+
+If the bill exists and is UNPAID, it is fetched and stored in the local database, making it available for link creation and payment processing.
+
+If the bill is already PAID, it is skipped, and the system reflects its paid status.
+
+If the bill does not exist in the Mock Bank, an appropriate error is returned.
+
+This ensures that the internal database remains synchronized with the simulated external billing system, keeping all bill states (CREATED, LINK_SENT, PAID, etc.) consistent and accurate.
 
 ## SCREENSHOTS
 
