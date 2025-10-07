@@ -1,7 +1,7 @@
 # Municipality Water Bill Payments
 
 A full-stack web application designed to simplify and secure the **management of municipal water bill payments**.  
-The system implements strict **role-based access control (RBAC)** to ensure that each user only interacts with data relevant to their municipality.
+The system implements strict **role-based access control (RBAC)** to ensure that each user only interacts with data relevant to their municipality, integrates Cashfree Payments API for online transactions with webhook-based auto reconciliation, and includes a Mock Bank API for bill verification. Built using Node.js, Express, MySQL, and React, it features real-time status tracking, email payment links, and a clean operator dashboard.
 
 ## System Overview
 
@@ -22,7 +22,7 @@ Each role has clearly separated access to ensure proper data isolation and secur
 
 | Role | Email | Password |
 |------|--------|-----------|
-| **Super Admin** | `superadmin@example.com` | `superpassword123` |
+| **Super Admin** | ` superadmin@gmail.com` | `Super@123` |
 
 ---
 ## Environment Variables
@@ -63,3 +63,64 @@ SMTP_PORT=
 SMTP_USER=
 SMTP_PASS=
 ```
+## Local Setup
+
+Follow these steps to run all components of the Municipal Water Bill Payments system locally:
+
+1. Backend Setup
+cd backend
+npm init -y
+node src/server.js
+
+2. Frontend Setup
+cd frontend
+npx create-react-app frontend
+npm start
+
+3. Mock Bank API
+cd mock-bank
+npm init -y
+node server.js
+
+4. MySQL Database
+CREATE DATABASE waterbillpayments;
+
+5. Ngrok (for Webhook Testing)
+ngrok http 4000
+
+6. MailHog (for Local Email Testing)
+mailhog
+
+
+Access it at: http://localhost:8025/
+
+## Mock Bank Integration
+
+The application includes a Mock Bank API that simulates an external billing system.
+When the operator enters a bill number, the backend first queries the Mock Bank service:
+
+If the bill exists and is UNPAID, it is fetched and stored in the local database, making it available for link creation and payment processing.
+
+If the bill is already PAID, it is skipped, and the system reflects its paid status.
+
+If the bill does not exist in the Mock Bank, an appropriate error is returned.
+
+This ensures that the internal database remains synchronized with the simulated external billing system, keeping all bill states (CREATED, LINK_SENT, PAID, etc.) consistent and accurate.
+
+## SCREENSHOTS
+
+<img width="1469" height="757" alt="Screenshot 2025-10-07 at 3 22 09 PM" src="https://github.com/user-attachments/assets/7bab88dd-add3-443a-ad6c-448c24ff970a" />
+<img width="1470" height="757" alt="Screenshot 2025-10-07 at 4 05 20 AM" src="https://github.com/user-attachments/assets/8330b5c5-aba5-453a-9d1a-01827b305c4b" />
+<img width="1467" height="536" alt="Screenshot 2025-10-07 at 4 05 10 AM" src="https://github.com/user-attachments/assets/2659df01-7592-4b9e-a2f9-210f7adb1f7a" />
+<img width="1460" height="757" alt="Screenshot 2025-10-07 at 4 53 32 PM" src="https://github.com/user-attachments/assets/ee86d3ad-1e32-4b38-91b1-e03404b011e0" />
+<img width="1468" height="757" alt="Screenshot 2025-10-07 at 3 23 04 PM" src="https://github.com/user-attachments/assets/bb0957cd-8943-4171-83ae-126610f7f18d" />
+<img width="1470" height="758" alt="Screenshot 2025-10-07 at 4 03 57 AM" src="https://github.com/user-attachments/assets/f10e72c4-951b-464b-b781-14f5ef911a78" />
+<img width="1465" height="754" alt="Screenshot 2025-10-07 at 4 03 25 AM" src="https://github.com/user-attachments/assets/7fb135a6-31ef-43a5-bd2e-180a2e6a3334" />
+<img width="1467" height="800" alt="Screenshot 2025-10-07 at 10 05 13 AM" src="https://github.com/user-attachments/assets/c1e0bcb5-cf4d-4f29-a1f7-606f56002b37" />
+<img width="1463" height="755" alt="Screenshot 2025-10-07 at 4 51 59 PM" src="https://github.com/user-attachments/assets/720bbb30-d318-47fe-9fcf-315d5fcd47d0" />
+<img width="1467" height="758" alt="Screenshot 2025-10-07 at 3 22 51 PM" src="https://github.com/user-attachments/assets/e86dabcb-3a15-4388-9d59-32cfe594a621" />
+<img width="1000" height="738" alt="Screenshot 2025-10-07 at 6 25 38 AM" src="https://github.com/user-attachments/assets/0805b95c-4390-47d6-9a45-cf790d3c1fee" />
+<img width="1470" height="807" alt="Screenshot 2025-10-07 at 3 22 23 PM" src="https://github.com/user-attachments/assets/2cf18b3b-5d64-4d2c-b763-46c643909d47" />
+e41a61996e0" />
+
+
