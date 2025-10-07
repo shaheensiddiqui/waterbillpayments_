@@ -1,0 +1,66 @@
+{
+	"info": {
+		"_postman_id": "195b4092-183f-4171-a452-60b53e3d1b71",
+		"name": "Mock-Bank",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45437031",
+		"_collection_link": "https://shahheensiddiqui.postman.co/workspace/Test-MWBP~01c80a06-38b6-49fe-a8af-e3fd41942204/collection/45437031-195b4092-183f-4171-a452-60b53e3d1b71?action=share&source=collection_link&creator=45437031"
+	},
+	"item": [
+		{
+			"name": "http://localhost:5001/mock-bank/bills/WB-2025-0001",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5001/mock-bank/bills/WB-2025-0001",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"mock-bank",
+						"bills",
+						"WB-2025-0001"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:5001/mock-bank/bills/WB-2025-0001/mark-paid",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"payment_ref\": \"CF_991827\",\n  \"paid_amount\": 525.0,\n  \"paid_at\": \"2025-10-07T12:30:00+05:30\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5001/mock-bank/bills/WB-2025-0001/mark-paid",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"mock-bank",
+						"bills",
+						"WB-2025-0001",
+						"mark-paid"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
