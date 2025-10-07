@@ -5,6 +5,7 @@ export default function Sidebar({ active, onSelect }) {
     { key: "fetch", label: "Fetch Bill" },
     { key: "create", label: "Create Bill" },
     { key: "view", label: "View All Bills" },
+    { key: "transactions", label: "Transactions Dashboard" },
   ];
 
   return (

@@ -9,7 +9,6 @@ const PaymentLink = require("./PaymentLink");
 Municipality.hasMany(User, { foreignKey: "municipality_id" });
 User.belongsTo(Municipality, { foreignKey: "municipality_id" });
 
-// ✅ Link Bills to User and Municipality
 Bill.belongsTo(User, { foreignKey: "created_by", as: "creator" });
 Bill.belongsTo(Municipality, { foreignKey: "municipality_id" });
 

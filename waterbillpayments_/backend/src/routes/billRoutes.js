@@ -12,13 +12,11 @@ const { sendPaymentEmail } = require("../controllers/emailController");
 const auth = require("../middleware/authMiddleware");
 const allow = require("../middleware/roleMiddleware");
 
-// ✅ Authenticated + role-based access
 router.post("/fetch", auth, allow(["OPERATOR", "ADMIN"]), fetchBillFromMockBank);
 router.post("/create", auth, allow(["OPERATOR", "ADMIN"]), createBill);
 router.get("/all", auth, allow(["OPERATOR", "ADMIN"]), getAllBills);
 router.get("/:billNumber", auth, allow(["OPERATOR", "ADMIN"]), getBillByNumber);
 
-// ✅ Email route
 router.post("/email/paylink", auth, allow(["OPERATOR", "ADMIN"]), sendPaymentEmail);
 
 module.exports = router;

@@ -4,7 +4,6 @@ const auth = require("../middleware/authMiddleware");
 const allow = require("../middleware/roleMiddleware");
 const User = require("../models/User");
 
-// GET all users (SuperAdmin only)
 router.get("/", auth, allow(["SUPERADMIN"]), async (req, res) => {
   try {
     const users = await User.findAll({
@@ -17,7 +16,6 @@ router.get("/", auth, allow(["SUPERADMIN"]), async (req, res) => {
   }
 });
 
-// GET Operators under the Admin's municipality
 router.get("/operators", auth, allow(["ADMIN"]), async (req, res) => {
   try {
     const admin = req.user; 

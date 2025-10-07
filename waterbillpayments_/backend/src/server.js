@@ -12,12 +12,12 @@ const userRoutes = require("./routes/userRoutes");
 const billRoutes = require("./routes/billRoutes");
 const paylinkRoutes = require("./routes/paylinkRoutes");
 const { cashfreeWebhook } = require("./controllers/webhookController");
+const transactionRoutes = require("./routes/transactionRoutes");
+
 
 const app = express();
 
-// --------------------------------------------------
-// ✅ 1. Webhook route with raw body (must come FIRST)
-// --------------------------------------------------
+
 app.post(
   "/webhooks/cashfree",
   express.raw({ type: "*/*" }),
@@ -33,26 +33,22 @@ app.post(
   cashfreeWebhook
 );
 
-// --------------------------------------------------
-// ✅ 2. Normal middleware for everything else
-// --------------------------------------------------
+
 app.use(cors());
 app.use(express.json());
 
-// --------------------------------------------------
-// ✅ 3. API Routes
-// --------------------------------------------------
+
 app.use("/api/auth", authRoutes);
 app.use("/api/municipalities", municipalityRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/bills", billRoutes);
 app.use("/api/paylinks", paylinkRoutes);
+app.use(transactionRoutes);
 
-// --------------------------------------------------
-// ✅ 4. Seed SuperAdmin
-// --------------------------------------------------
+
+//seed super admin details
 async function seedSuperAdmin() {
-  const email = "superadmin@municipal.gov";
+  const email = "superadmin@gmail.com";
   const password = "Super@123";
   const name = "Default Super Admin";
 
@@ -66,9 +62,7 @@ async function seedSuperAdmin() {
   }
 }
 
-// --------------------------------------------------
-// ✅ 5. Start Server
-// --------------------------------------------------
+
 const PORT = process.env.PORT || 4000;
 
 (async () => {

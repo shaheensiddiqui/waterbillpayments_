@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { API_BASE } from "../../config";
 import { QRCodeCanvas } from "qrcode.react";
+import { toast } from "react-toastify";
+
 
 const statuses = ["CREATED", "LINK_SENT", "PAID", "CANCELLED"];
 
@@ -167,14 +169,17 @@ setLinkErr(msg);
   onClick={async () => {
     try {
       await axios.post(
-  `${API_BASE}/api/bills/email/paylink`,
-  { bill_number: bill.bill_number, to_email: bill.email },
-  { headers: { Authorization: `Bearer ${token}` } }
-);
+        `${API_BASE}/api/bills/email/paylink`,
+        { bill_number: bill.bill_number, to_email: bill.email },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-      alert("Email sent successfully!");
+      toast.success("Email sent successfully!");
     } catch (err) {
-      alert(err.response?.data?.error || "Failed to send email");
+      const msg =
+        err.response?.data?.error ||
+        "Email delivery failed — message bounced back.";
+      toast.error(msg);
     }
   }}
 >
@@ -182,7 +187,7 @@ setLinkErr(msg);
 </button>
 
 
-            {/* 🔹 Timeline added here */}
+
             <BillTimeline currentStatus={bill.status} />
           </div>
         </div>

@@ -30,7 +30,6 @@ exports.createPayLink = async (req, res) => {
     const amount = Number(bill.total_amount || 0);
     if (!amount || amount <= 0) return res.status(400).json({ error: "Invalid amount" });
 
-    // Always use Cashfree sandbox (disable mock fallback)
     const cfBase = process.env.CASHFREE_BASE_URL || "https://sandbox.cashfree.com/pg";
 
 
@@ -48,10 +47,10 @@ const body = {
     return_url: `${process.env.APP_BASE_URL}/thank-you?bill=${bill.bill_number}`
   },
   link_notes: {
-    bill_number: bill.bill_number  // ✅ store bill number inside link notes
+    bill_number: bill.bill_number  
   },
   order_tags: {
-    bill_number: bill.bill_number,   // add this line
+    bill_number: bill.bill_number,   
     link_id: linkId
   }
 };

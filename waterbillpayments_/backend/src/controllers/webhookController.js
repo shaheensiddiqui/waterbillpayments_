@@ -6,9 +6,7 @@ const Transaction = require("../models/Transaction");
 const WebhookEvent = require("../models/WebhookEvent");
 const axios = require("axios");
 
-// ------------------------------
-// Verify Cashfree webhook signature
-// ------------------------------
+
 function verifySignature(req) {
   const secret = process.env.CASHFREE_CLIENT_SECRET;
   const sig = req.headers["x-webhook-signature"];
@@ -36,9 +34,6 @@ function verifySignature(req) {
   return match;
 }
 
-// ------------------------------
-// Cashfree Webhook Handler
-// ------------------------------
 exports.cashfreeWebhook = async (req, res) => {
   let webhookLog = null;
 
@@ -46,11 +41,11 @@ exports.cashfreeWebhook = async (req, res) => {
     const event = req.body;
     console.log("\n✅ Received Cashfree webhook:", event.type);
 
-    // 1️⃣ Verify Signature
+    // Verify Signature
     const verified = verifySignature(req);
     console.log("🔐 Signature verified:", verified);
 
-    // 2️⃣ Log webhook
+
     webhookLog = await WebhookEvent.create({
       type: event.type || "UNKNOWN",
       raw_payload: JSON.stringify(event),
@@ -90,9 +85,7 @@ exports.cashfreeWebhook = async (req, res) => {
       return res.status(200).json({ message: "Bill not found" });
     }
 
-    // ------------------------------------
-    // SUCCESSFUL PAYMENT
-    // ------------------------------------
+   
     if (
       event.type === "PAYMENT_SUCCESS_WEBHOOK" ||
       event.type === "payment.success"
@@ -135,9 +128,6 @@ exports.cashfreeWebhook = async (req, res) => {
       console.log(`✅ Bill ${bill.bill_number} fully processed`);
     }
 
-    // ------------------------------------
-    // FAILED / CANCELLED / USER DROPPED
-    // ------------------------------------
     else if (
       event.type === "PAYMENT_FAILED_WEBHOOK" ||
       event.type === "payment.failed" ||
@@ -173,9 +163,7 @@ exports.cashfreeWebhook = async (req, res) => {
       });
     }
 
-    // ------------------------------------
-    // PENDING PAYMENT
-    // ------------------------------------
+
     else if (
       event.type === "PAYMENT_PENDING_WEBHOOK" ||
       event.type === "payment.pending"
@@ -189,9 +177,7 @@ exports.cashfreeWebhook = async (req, res) => {
       });
     }
 
-    // ------------------------------------
-    // UNHANDLED EVENTS
-    // ------------------------------------
+   
     else {
       console.log(`ℹ️ Ignored event type: ${event.type}`);
     }

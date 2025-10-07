@@ -3,6 +3,8 @@ import Sidebar from "../components/operator/Sidebar";
 import FetchBill from "../components/operator/FetchBill";
 import CreateBill from "../components/operator/CreateBill";
 import ViewBills from "../components/operator/ViewBills";
+import Transactions from "../components/operator/Transactions";
+
 
 
 export default function OperatorDashboard() {
@@ -17,6 +19,9 @@ export default function OperatorDashboard() {
         return <CreateBill token={token} />;
       case "view":
        return <ViewBills token={token} />;
+       case "transactions":
+  return <Transactions token={token} />;
+
       default:
         return <FetchBill token={token} />;
     }

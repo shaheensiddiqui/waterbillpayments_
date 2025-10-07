@@ -92,7 +92,6 @@ exports.login = async (req, res) => {
       { expiresIn: "2h" }
     );
 
-    // 🔹 Also return municipality_id in response so frontend can store it
     res.json({
       token,
       role: user.role,
