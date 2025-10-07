@@ -1,0 +1,47 @@
+{
+  "WB-2025-0001": {
+    "bill_number": "WB-2025-0001",
+    "consumer_name": "Asha Kumar",
+    "email": "asha@example.com",
+    "address": "12, Lake View Rd, Chennai",
+    "service_period_start": "2025-07-01",
+    "service_period_end": "2025-07-31",
+    "due_date": "2025-09-15",
+    "base_amount": 500,
+    "penalty_amount": 25,
+    "total_amount": 525,
+    "status": "PAID",
+    "bank_ref": "BNKREF12345",
+    "payment_ref": "CF_991827",
+    "paid_amount": 525,
+    "paid_at": "2025-10-07T12:30:00+05:30"
+  },
+  "WB-2025-0002": {
+    "bill_number": "WB-2025-0002",
+    "consumer_name": "Rajesh Sharma",
+    "email": "rajesh@example.com",
+    "address": "42, MG Road, Bengaluru",
+    "service_period_start": "2025-06-01",
+    "service_period_end": "2025-06-30",
+    "due_date": "2025-07-15",
+    "base_amount": 750,
+    "penalty_amount": 0,
+    "total_amount": 750,
+    "status": "PAID",
+    "bank_ref": "BNKREF67890"
+  },
+  "WB-2025-0003": {
+    "bill_number": "WB-2025-0003",
+    "consumer_name": "Nisha Patel",
+    "email": "nisha@example.com",
+    "address": "8, Gandhi Street, Pune",
+    "service_period_start": "2025-05-01",
+    "service_period_end": "2025-05-31",
+    "due_date": "2025-06-10",
+    "base_amount": 600,
+    "penalty_amount": 50,
+    "total_amount": 650,
+    "status": "EXPIRED",
+    "bank_ref": "BNKREF54321"
+  }
+}
